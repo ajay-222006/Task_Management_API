@@ -1,0 +1,272 @@
+{
+	"info": {
+		"_postman_id": "63a67ba6-1573-400a-ac37-95ac7f8508c2",
+		"name": "Task Management API",
+		"description": "StartFragmentPostman collection for Task Management API with automated tests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49499738",
+		"_collection_link": "https://ajaychill2006-9953943.postman.co/workspace/Ajay's-Workspace~8cc2f955-3a02-4ed4-86da-d526ce10c8c4/collection/49499738-63a67ba6-1573-400a-ac37-95ac7f8508c2?action=share&source=collection_link&creator=49499738"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const json = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Status is 201\", () => {\r",
+							"    pm.expect(pm.response.code).to.eql(201);\r",
+							"});\r",
+							"\r",
+							"if (pm.response.code === 201) {\r",
+							"    // Save taskId only if creation succeeded\r",
+							"    pm.environment.set(\"createdTaskId\", json.taskId || json.id);\r",
+							"    pm.test(\"Response has taskId/id and title\", () => {\r",
+							"        pm.expect(json).to.have.any.keys(\"taskId\", \"id\");\r",
+							"        pm.expect(json).to.have.property(\"title\");\r",
+							"    });\r",
+							"} else {\r",
+							"    // Log the error so you can see why it failed\r",
+							"    console.log(\"POST request failed:\", json);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"title\": \"Unique task 12\",\r\n  \"description\": \"Created by Postman\",\r\n  \"status\": \"pending\",\r\n  \"priority\": \"high\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/api/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", () => pm.response.to.have.status(200));\r",
+							"const body = pm.response.json();\r",
+							"pm.test(\"Body is an array\", () => pm.expect(body).to.be.an(\"array\"));\r",
+							"pm.test(\"Contains at least one task\", () => pm.expect(body.length).to.be.at.least(1));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/api/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const t = pm.response.json();\r",
+							"pm.test(\"GET task by ID\", () => {\r",
+							"    pm.expect([200, 404]).to.include(pm.response.code);\r",
+							"});\r",
+							"if (pm.response.code === 200) {\r",
+							"    const taskId = t.taskId || t.id;\r",
+							"    pm.test(\"Has id matching env\", () => {\r",
+							"        pm.expect(taskId).to.eql(pm.environment.get(\"createdTaskId\"));\r",
+							"    });\r",
+							"    pm.test(\"Has required fields\", () => {\r",
+							"        pm.expect(t).to.have.property(\"title\");\r",
+							"        pm.expect(t).to.have.property(\"status\");\r",
+							"        pm.expect(t).to.have.property(\"priority\");\r",
+							"    });\r",
+							"    pm.test(\"GET task by ID\", () => {\r",
+							"    pm.expect([200, 404]).to.include(pm.response.code);\r",
+							"});\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/api/tasks/55e1c1d9-4f4c-4211-a7c4-e5357a0b5279",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"tasks",
+						"55e1c1d9-4f4c-4211-a7c4-e5357a0b5279"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"PATCH task\", () => {\r",
+							"    pm.expect([200, 404]).to.include(pm.response.code);\r",
+							"});\r",
+							"if (pm.response.code === 200) {\r",
+							"    const t = pm.response.json();\r",
+							"    pm.test(\"Status field updated\", () => {\r",
+							"        pm.expect(t.status).to.eql(\"completed\");\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"status\": \"completed\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/api/tasks/55e1c1d9-4f4c-4211-a7c4-e5357a0b5279",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"tasks",
+						"55e1c1d9-4f4c-4211-a7c4-e5357a0b5279"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"DELETE task\", () => {\r",
+							"    pm.expect([200, 204, 404]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/api/tasks/55e1c1d9-4f4c-4211-a7c4-e5357a0b5279",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"api",
+						"tasks",
+						"55e1c1d9-4f4c-4211-a7c4-e5357a0b5279"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
